@@ -5,20 +5,34 @@
 package gotoml
 
 import (
-	"log"
 	"math/rand"
 	"time"
 )
 
+// Errxxxx constants lists all errors
+const (
+	ErrGridWrongDimensions = Error("Wrong dimensions for Grid creation [height or width <= 0]")
+)
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
+
 }
+
 func main() {
 
-	cell := Cell{Weight: 1}
+}
 
-	for i := 0; i < 100; i++ {
-		log.Println(cell.TakeAction(1, 0))
+//NewGrid creates a grid based on height and width
+func NewGrid(height, width int, cell Cell) (g Grid, err error) {
+	if height <= 0 || width <= 0 {
+		return Grid{}, ErrGridWrongDimensions
 	}
-
+	g.Cells = make([][]Cell, height)
+	for h := range g.Cells {
+		g.Cells[h] = make([]Cell, width)
+	}
+	g.Height = height
+	g.Width = width
+	return g, nil
 }
