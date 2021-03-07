@@ -12,11 +12,11 @@ import (
 // Errxxxx constants lists all errors
 const (
 	ErrGridWrongDimensions = Error("Wrong dimensions for Grid creation [height or width <= 0]")
+	ErrEpsilonOutOfRange   = Error("epsilon greedy must be >= 0 & <= 1")
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-
 }
 
 func main() {
@@ -24,13 +24,13 @@ func main() {
 }
 
 //NewGrid creates a grid based on height and width
-func NewGrid(height, width int, cell Cell) (g Grid, err error) {
+func NewGrid(height, width int, node Noder) (g Grid, err error) {
 	if height <= 0 || width <= 0 {
 		return Grid{}, ErrGridWrongDimensions
 	}
-	g.Cells = make([][]Cell, height)
-	for h := range g.Cells {
-		g.Cells[h] = make([]Cell, width)
+	g.Nodes = make([][]Noder, height, height)
+	for h := range g.Nodes {
+		g.Nodes[h] = make([]Noder, width, width)
 	}
 	g.Height = height
 	g.Width = width

@@ -4,88 +4,104 @@ import "testing"
 
 func TestTakeAction(t *testing.T) {
 	tests := []struct {
-		givenCell         Cell
+		givenNode         Noder
 		givenEpsilG       float64
 		expectedAction    int
 		expectedActionMax int
 	}{
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.5, 0, 0.8, 0},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0.5, 0, 0.8, 0},
+			},
+			givenEpsilG:       1,
+			expectedActionMax: 4,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0.5, 0, 0.8, 0},
+			},
+			givenEpsilG:       0.5,
+			expectedActionMax: 4,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv4{0.5, 0, 0.8, 0},
 			},
 			givenEpsilG:       1,
 			expectedActionMax: 3,
 		},
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.5, 0, 0.8, 0},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv4{0.5, 0, 0.8, 0},
 			},
 			givenEpsilG:       0.5,
 			expectedActionMax: 3,
 		},
 		//greedy only
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0, 0, 0, 0},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0, 0, 0, 0},
 			},
 			givenEpsilG:    0,
 			expectedAction: 0,
 		},
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{-1, 0, 0, 0},
-			},
-			givenEpsilG:    0,
-			expectedAction: 1,
-		},
-		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{-1, -1, -1, -1},
-			},
-			givenEpsilG:    0,
-			expectedAction: 0,
-		},
-		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.9, 0, 0, 0},
-			},
-			givenEpsilG:    0,
-			expectedAction: 0,
-		},
-		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.5, 0.9, 0.8, 0},
-			},
-			givenEpsilG:    0,
-			expectedAction: 1,
-		},
-		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.5, 0, 0.8, 0},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{-1, -1, 0, 0, 0},
 			},
 			givenEpsilG:    0,
 			expectedAction: 2,
 		},
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{0.5, 0, 0.8, 0.9},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{-1, -1, -1, -1, -1},
+			},
+			givenEpsilG:    0,
+			expectedAction: 0,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0.9, 0, 0, 0, 0},
+			},
+			givenEpsilG:    0,
+			expectedAction: 0,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0.5, 0.9, 0.8, 0},
+			},
+			givenEpsilG:    0,
+			expectedAction: 2,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0.5, 0, 0.8, 0},
 			},
 			givenEpsilG:    0,
 			expectedAction: 3,
 		},
 		{
-			givenCell: &Cell4Dir{
-				Weight:  1,
-				Actions: []float64{1, 1, 1, 1},
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv5{0, 0.5, 0, 0.8, 0.9},
+			},
+			givenEpsilG:    0,
+			expectedAction: 4,
+		},
+		{
+			givenNode: &Node{
+				Reward:    1,
+				ActionsQv: &ActionsQv4{1, 1, 1, 1},
 			},
 			givenEpsilG:    0,
 			expectedAction: 0,
@@ -93,10 +109,10 @@ func TestTakeAction(t *testing.T) {
 	}
 
 	for i, chk := range tests {
-		if i <= 1 {
+		if i <= 3 {
 			// random
 			for j := 0; j < 100; j++ {
-				gotAction := chk.givenCell.TakeAction(chk.givenEpsilG)
+				gotAction := chk.givenNode.TakeAction(chk.givenEpsilG)
 				if gotAction > chk.expectedActionMax {
 					t.Errorf("given EpsilonG : [%v] \n expected max : [%v] got : [%v]", chk.givenEpsilG, chk.expectedActionMax, gotAction)
 				}
@@ -104,79 +120,89 @@ func TestTakeAction(t *testing.T) {
 
 		} else {
 			// greedy
-			gotAction := chk.givenCell.TakeAction(chk.givenEpsilG)
+			gotAction := chk.givenNode.TakeAction(chk.givenEpsilG)
 			if gotAction != chk.expectedAction {
-				t.Errorf("given: [%v] \n expected : [%v] got : [%v]", chk.givenCell.GetActions(), chk.expectedAction, gotAction)
+				t.Errorf("given: [%v] \n expected : [%v] got : [%v]", chk.givenNode.GetActionsQv(), chk.expectedAction, gotAction)
 			}
 		}
 	}
 }
 
 func BenchmarkTakeActionExploreFull(b *testing.B) {
-	var CellTest Cell
-	CellTest = &Cell4Dir{Actions: []float64{0.1, 0.2, 1, -1}}
+	var NodeTest Noder
+	NodeTest = &Node{ActionsQv: &ActionsQv5{0, 0.1, 0.2, 1, -1}}
 	for i := 0; i < b.N; i++ {
-		CellTest.TakeAction(1)
+		NodeTest.TakeAction(1)
 	}
 }
 
 func BenchmarkTakeActionExploreMid(b *testing.B) {
-	var CellTest Cell
-	CellTest = &Cell4Dir{Actions: []float64{0.1, 0.2, 1, -1}}
+	var NodeTest Noder
+	NodeTest = &Node{ActionsQv: &ActionsQv5{0, 0.1, 0.2, 1, -1}}
 	for i := 0; i < b.N; i++ {
-		CellTest.TakeAction(0.5)
+		NodeTest.TakeAction(0.5)
 	}
 }
 
 func BenchmarkTakeActionExploit(b *testing.B) {
-	var CellTest Cell
-	CellTest = &Cell4Dir{Actions: []float64{0.1, 0.2, 1, -1}}
+	var NodeTest Noder
+	NodeTest = &Node{ActionsQv: &ActionsQv5{0, 0.1, 0.2, 1, -1}}
 	for i := 0; i < b.N; i++ {
-		CellTest.TakeAction(0)
+		NodeTest.TakeAction(0)
 	}
 }
 
 func TestGrid(t *testing.T) {
 	tests := []struct {
 		givenDim         []int
-		givenInterf      Cell
-		givenCellCoord   []int
-		givenCell        Cell
+		givenNodeCoord   []int
+		givenNode        Noder
 		expectedErr      error
-		expectedCellBool bool
-		expectedCellVal  Cell
+		expectedNodeBool bool
+		expectedNodeVal  Noder
 	}{
 		{
 			givenDim:         []int{10, 3},
-			givenInterf:      Cell4Dir{},
-			givenCellCoord:   []int{0, 0},
-			givenCell:        Cell4Dir{Actions: []float64{1, 1, 1, 1}},
+			givenNodeCoord:   []int{0, 0},
+			givenNode:        &Node{ActionsQv: &ActionsQv5{0, 1, 1, 1, 1}},
 			expectedErr:      nil,
-			expectedCellBool: true,
-			expectedCellVal:  Cell4Dir{Actions: []float64{-1, 1, 1, -1}},
+			expectedNodeBool: true,
+			expectedNodeVal:  &Node{ActionsQv: &ActionsQv5{0, -1, 1, 1, -1}},
 		},
 		{
 			givenDim:         []int{10, 3},
-			givenInterf:      Cell4Dir{},
-			givenCellCoord:   []int{10, 0},
-			givenCell:        Cell4Dir{Actions: []float64{1, 1, 1, 1}},
+			givenNodeCoord:   []int{10, 0},
+			givenNode:        &Node{ActionsQv: &ActionsQv5{0, 1, 1, 1, 1}},
 			expectedErr:      nil,
-			expectedCellBool: false,
+			expectedNodeBool: false,
+		},
+		{
+			givenDim:         []int{10, 3},
+			givenNodeCoord:   []int{0, 0},
+			givenNode:        &Node{ActionsQv: &ActionsQv4{1, 1, 1, 1}},
+			expectedErr:      nil,
+			expectedNodeBool: true,
+			expectedNodeVal:  &Node{ActionsQv: &ActionsQv4{-1, 1, 1, -1}},
+		},
+		{
+			givenDim:         []int{10, 3},
+			givenNodeCoord:   []int{10, 0},
+			givenNode:        &Node{ActionsQv: &ActionsQv4{1, 1, 1, 1}},
+			expectedErr:      nil,
+			expectedNodeBool: false,
 		},
 		{
 			givenDim:    []int{0, 3},
-			givenInterf: Cell4Dir{},
 			expectedErr: ErrGridWrongDimensions,
 		},
 		{
 			givenDim:    []int{10, -3},
-			givenInterf: Cell4Dir{},
 			expectedErr: ErrGridWrongDimensions,
 		},
 	}
 
 	for _, chk := range tests {
-		gridTest, gotErr := NewGrid(chk.givenDim[0], chk.givenDim[1], chk.givenInterf)
+		gridTest, gotErr := NewGrid(chk.givenDim[0], chk.givenDim[1], &Node{})
 		if chk.expectedErr != gotErr {
 			t.Errorf("given %v expected %v got %v", chk.givenDim, chk.expectedErr, gotErr)
 		}
@@ -188,23 +214,23 @@ func TestGrid(t *testing.T) {
 				t.Errorf("height given %v got grid width %v", chk.givenDim[1], gridTest.Width)
 			}
 
-			gotBool := gridTest.PutCell(chk.givenCellCoord[0], chk.givenCellCoord[1], chk.givenCell)
-			if chk.expectedCellBool != gotBool {
-				t.Errorf("given Cell  %v in %v got %v expected %v", chk.givenCell, chk.givenDim, gotBool, chk.expectedCellBool)
+			gotBool := gridTest.PutNode(chk.givenNodeCoord[0], chk.givenNodeCoord[1], chk.givenNode)
+			if chk.expectedNodeBool != gotBool {
+				t.Errorf("given Noder  %v in %v got %v expected %v", chk.givenNode, chk.givenDim, gotBool, chk.expectedNodeBool)
 			}
-			if gotBool && chk.expectedCellBool == gotBool {
-				gotCell, _ := gridTest.GetCell(chk.givenCellCoord[0], chk.givenCellCoord[1])
-				if chk.expectedCellVal.GetAction(0) != gotCell.GetAction(0) {
-					t.Errorf("expected Cell  %v got %v ", chk.expectedCellVal, gotCell)
+			if gotBool && chk.expectedNodeBool == gotBool {
+				gotNode := gridTest.GetNode(chk.givenNodeCoord[0], chk.givenNodeCoord[1])
+				if chk.expectedNodeVal.GetActionQv(0) != gotNode.GetActionQv(0) {
+					t.Errorf("expected Noder  %v got %v ", chk.expectedNodeVal, gotNode)
 				}
-				if chk.expectedCellVal.GetAction(1) != gotCell.GetAction(1) {
-					t.Errorf("expected Cell  %v got %v ", chk.expectedCellVal, gotCell)
+				if chk.expectedNodeVal.GetActionQv(1) != gotNode.GetActionQv(1) {
+					t.Errorf("expected Noder  %v got %v ", chk.expectedNodeVal, gotNode)
 				}
-				if chk.expectedCellVal.GetAction(2) != gotCell.GetAction(2) {
-					t.Errorf("expected Cell  %v got %v ", chk.expectedCellVal, gotCell)
+				if chk.expectedNodeVal.GetActionQv(2) != gotNode.GetActionQv(2) {
+					t.Errorf("expected Noder  %v got %v ", chk.expectedNodeVal, gotNode)
 				}
-				if chk.expectedCellVal.GetAction(3) != gotCell.GetAction(3) {
-					t.Errorf("expected Cell  %v got %v ", chk.expectedCellVal, gotCell)
+				if chk.expectedNodeVal.GetActionQv(3) != gotNode.GetActionQv(3) {
+					t.Errorf("expected Noder  %v got %v ", chk.expectedNodeVal, gotNode)
 				}
 			}
 		}
