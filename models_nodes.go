@@ -2,7 +2,6 @@ package gotoml
 
 import (
 	"fmt"
-	"sync"
 )
 
 // Noder interface
@@ -14,8 +13,8 @@ type Noder interface {
 	GetVisited() int
 	PutVisited(v int)
 	GetActionsQv() interface{}
-	GetActionQv(aid uint) float64
-	PutActionQv(aid uint, v float64)
+	GetActionQv(aid int) float64
+	PutActionQv(aid int, v float64)
 	TakeAction(epsilG float64) (aid int)
 	GetStateQv() float64
 	PutStateQv(v float64)
@@ -24,7 +23,6 @@ type Noder interface {
 
 // Node type of a Grid world
 type Node struct {
-	Mutx      *sync.RWMutex
 	RawVal    string   //raw value in 'real' world
 	Reward    float64  //Reward of Noder should be >-100 & <100
 	StateQv   float64  //Noder Q value
@@ -33,67 +31,67 @@ type Node struct {
 }
 
 // GetRawVal to get raw value from node
-func (c *Node) GetRawVal() string {
-	return c.RawVal
+func (n *Node) GetRawVal() string {
+	return n.RawVal
 }
 
 // PutRawVal to put raw value on node
-func (c *Node) PutRawVal(s string) {
-	c.RawVal = s
+func (n *Node) PutRawVal(s string) {
+	n.RawVal = s
 }
 
 // GetReward to get Reward value  from node
-func (c *Node) GetReward() float64 {
-	return c.Reward
+func (n *Node) GetReward() float64 {
+	return n.Reward
 }
 
 // PutReward to put Reward value on node
-func (c *Node) PutReward(f float64) {
-	c.Reward = f
+func (n *Node) PutReward(f float64) {
+	n.Reward = f
 }
 
 // GetVisited to get number of visits from node
-func (c *Node) GetVisited() int {
-	return int(c.Visited)
+func (n *Node) GetVisited() int {
+	return int(n.Visited)
 }
 
 // PutVisited to put number of visits on node
-func (c Node) PutVisited(v int) {
-	c.Visited = v
+func (n *Node) PutVisited(v int) {
+	n.Visited = v
 }
 
 // GetActionsQv to get Actions Quality Value list from node
-func (c *Node) GetActionsQv() interface{} {
-	return c.ActionsQv.GetActionsQv()
+func (n *Node) GetActionsQv() interface{} {
+	return n.ActionsQv.GetActionsQv()
 }
 
 // GetActionQv to get specific Quality Value from action node
-func (c *Node) GetActionQv(aid uint) float64 {
-	return c.ActionsQv.GetActionQv(aid)
+func (n *Node) GetActionQv(aid int) float64 {
+	return n.ActionsQv.GetActionQv(aid)
 }
 
 // PutActionQv to put specific Quality Value on action node
-func (c *Node) PutActionQv(aid uint, v float64) {
-	c.ActionsQv.PutActionQv(aid, v)
+func (n *Node) PutActionQv(aid int, v float64) {
+	n.ActionsQv.PutActionQv(aid, v)
 }
 
 // GetStateQv to get State Quality Value from node
-func (c *Node) GetStateQv() float64 {
-	return c.StateQv
+func (n *Node) GetStateQv() float64 {
+	return n.StateQv
 }
 
 // PutStateQv to put State Quality Value on node
-func (c *Node) PutStateQv(v float64) {
-	c.StateQv = v
+func (n *Node) PutStateQv(v float64) {
+	n.StateQv = v
 }
 
 // Print for Printer interface
-func (c *Node) Print() {
-	fmt.Printf("%v", c)
+func (n *Node) Print() {
+	fmt.Printf("%v", n)
 }
 
 // TakeAction from a node based on epsilon
 // epsilon between 0-1 1 for exploration max and 0 for exploitation max greedy)
-func (c *Node) TakeAction(epsilG float64) (aid int) {
-	return c.ActionsQv.TakeAction(epsilG)
+func (n *Node) TakeAction(epsilG float64) (aid int) {
+	return n.ActionsQv.TakeAction(epsilG)
 }

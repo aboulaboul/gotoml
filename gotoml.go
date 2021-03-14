@@ -24,7 +24,9 @@ func main() {
 }
 
 //NewGrid creates a grid based on height and width
-func NewGrid(height, width int, node Noder) (g Grid, err error) {
+func NewGrid(p Params, node Noder) (g Grid, err error) {
+	height := int(p["Height"])
+	width := int(p["Width"])
 	if height <= 0 || width <= 0 {
 		return Grid{}, ErrGridWrongDimensions
 	}
@@ -32,7 +34,6 @@ func NewGrid(height, width int, node Noder) (g Grid, err error) {
 	for h := range g.Nodes {
 		g.Nodes[h] = make([]Noder, width, width)
 	}
-	g.Height = height
-	g.Width = width
+	g.Params = p
 	return g, nil
 }

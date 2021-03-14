@@ -9,8 +9,8 @@ import (
 // Actioner interface
 type Actioner interface {
 	GetActionsQv() interface{}
-	GetActionQv(aid uint) float64
-	PutActionQv(aid uint, v float64)
+	GetActionQv(aid int) float64
+	PutActionQv(aid int, v float64)
 	TakeAction(epsilG float64) (aid int)
 	Print()
 }
@@ -24,12 +24,12 @@ func (a *ActionsQv4) GetActionsQv() interface{} {
 }
 
 // GetActionQv to get specific action Quality Value
-func (a *ActionsQv4) GetActionQv(aid uint) float64 {
+func (a *ActionsQv4) GetActionQv(aid int) float64 {
 	return a[aid]
 }
 
 // PutActionQv to put specific action Quality Value
-func (a *ActionsQv4) PutActionQv(aid uint, v float64) {
+func (a *ActionsQv4) PutActionQv(aid int, v float64) {
 	a[aid] = v
 }
 
@@ -76,12 +76,12 @@ func (a *ActionsQv5) GetActionsQv() interface{} {
 }
 
 // GetActionQv to get specific action Quality Value
-func (a *ActionsQv5) GetActionQv(aid uint) float64 {
+func (a *ActionsQv5) GetActionQv(aid int) float64 {
 	return a[aid]
 }
 
 // PutActionQv to put specific action Quality Value
-func (a *ActionsQv5) PutActionQv(aid uint, v float64) {
+func (a *ActionsQv5) PutActionQv(aid int, v float64) {
 	a[aid] = v
 }
 

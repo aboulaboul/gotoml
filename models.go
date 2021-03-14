@@ -4,22 +4,26 @@ import (
 	"fmt"
 )
 
-// Error for handling errors as constants
+// Error struct for handling errors as constants
 type Error string
 
 func (e Error) Error() string {
 	return string(e)
 }
 
-// Grid world contains states and Qtables
+// Grid world struct contains states and Qtables
 type Grid struct {
-	Nodes    [][]Noder
-	Width    int
-	Height   int
-	EpsilonG float64 //epsilon greedy
-	Alpha    float64 //learning rate (0.1)
-	Gamma    float64 //discount rate (0.9)
+	Nodes  [][]Noder
+	Params Params
 }
+
+// Params type
+// Height
+// Width
+// EpsilonG for epsilon greedy
+// Alpha for learning rate (0.1)
+// Gamma for discount rate (0.9)
+type Params map[string]float64
 
 // DisplayRawVal of grid
 func (g *Grid) DisplayRawVal() {
@@ -93,51 +97,55 @@ func (g *Grid) PutNode(l, c int, node Noder) bool {
 	if !g.checkInGrid(l, c) {
 		return false
 	}
-	g.Nodes[l][c] = node
+	Height := int(g.Params["Height"])
+	Width := int(g.Params["Width"])
 	switch node.GetActionsQv().(type) {
 	case *ActionsQv4:
 		// init border ActionsQv
 		if l == 0 {
-			g.Nodes[l][c].PutActionQv(0, -1)
-		} else if l == g.Height-1 {
-			g.Nodes[l][c].PutActionQv(2, -1)
+			node.PutActionQv(0, -1)
+		} else if l == Height-1 {
+			node.PutActionQv(2, -1)
 		}
 		if c == 0 {
-			g.Nodes[l][c].PutActionQv(3, -1)
-		} else if c == g.Width-1 {
-			g.Nodes[l][c].PutActionQv(1, -1)
+			node.PutActionQv(3, -1)
+		} else if c == Width-1 {
+			node.PutActionQv(1, -1)
 		}
 	case *ActionsQv5:
 		// init border ActionsQv
 		if l == 0 {
-			g.Nodes[l][c].PutActionQv(1, -1)
-		} else if l == g.Height-1 {
-			g.Nodes[l][c].PutActionQv(3, -1)
+			node.PutActionQv(1, -1)
+		} else if l == Height-1 {
+			node.PutActionQv(3, -1)
 		}
 		if c == 0 {
-			g.Nodes[l][c].PutActionQv(4, -1)
-		} else if c == g.Width-1 {
-			g.Nodes[l][c].PutActionQv(2, -1)
+			node.PutActionQv(4, -1)
+		} else if c == Width-1 {
+			node.PutActionQv(2, -1)
 		}
 	default:
 		return false
 	}
+	g.Nodes[l][c] = node
 	return true
 }
 
 // checkInGrid checks if line & colomn coordinates are in height & width
 func (g *Grid) checkInGrid(l, c int) bool {
-	if l < 0 || l >= g.Height {
+	Height := int(g.Params["Height"])
+	Width := int(g.Params["Width"])
+	if l < 0 || l >= Height {
 		return false
 	}
-	if c < 0 || c >= g.Width {
+	if c < 0 || c >= Width {
 		return false
 	}
 	return true
 }
 
 // Move from a Node to another and update Q values
-func (g *Grid) Move(fromL, fromC int, aid uint) (toL, toC int, ok bool) {
+func (g *Grid) Move(fromL, fromC int, aid int) (toL, toC int, ok bool) {
 	node := g.GetNode(fromL, fromC)
 	if node == nil {
 		return toL, toC, false
@@ -175,11 +183,18 @@ func (g *Grid) Move(fromL, fromC int, aid uint) (toL, toC int, ok bool) {
 		return toL, toC, false
 	}
 	//update Q values
-	q := (1-g.Alpha)*node.GetActionQv(aid) + g.Alpha*(node1.GetReward()+g.Gamma*node1.GetStateQv())
+	Alpha := g.Params["Alpha"]
+	Gamma := g.Params["Gamma"]
+
+	q := (1-Alpha)*node.GetActionQv(aid) + Alpha*(node1.GetReward()+Gamma*node1.GetStateQv())
 	node.PutActionQv(aid, q)
 	node.PutVisited(node.GetVisited() + 1)
 	if q > node.GetStateQv() {
 		node.PutStateQv(q)
 	}
-	return toL, toC, g.PutNode(fromL, fromC, node)
+	ok = g.PutNode(fromL, fromC, node)
+	if !ok {
+		return toL, toC, false
+	}
+	return toL, toC, ok
 }
